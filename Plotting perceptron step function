@@ -1,0 +1,60 @@
+def train_perceptron_algorithm(X, y, learn_rate=0.01, num_epochs=25):
+    """
+    This function runs the perceptron algorithm repeatedly on the dataset,
+    and returns a few of the boundary lines obtained in the iterations,
+    for plotting purposes.
+    """
+    x_min, x_max = min(X.T[0]), max(X.T[0])
+    y_min, y_max = min(X.T[1]), max(X.T[1])
+    W = np.array(np.random.rand(2,1))
+    b = np.random.rand(1)[0] + x_max
+    # These are the solution lines that get plotted below.
+    boundary_lines = []
+    for i in range(num_epochs):
+        # In each epoch, we apply the perceptron step.
+        W, b = perceptron_step(X, y, W, b, learn_rate)
+        boundary_lines.append((-W[0]/W[1], -b/W[1]))
+    return boundary_lines
+
+def plot_line(m, b, linestyle='dashed', color='gray', fill=False):
+    """
+    Helper function to avoid repetitive code when plotting boundary lines
+    """
+    x = np.arange(-10.0, 10.0, 0.1)
+    plt.plot(x, m*x+b, linestyle=linestyle, color=color)
+    if fill:
+        plt.fill_between(x, m*x+b, -0.05, color=blue, alpha=0.3)
+        plt.fill_between(x, m*x+b, 1.05, color=red, alpha=0.3)
+        
+# Load data
+data = np.asarray(pd.read_csv("data.csv", header=None))
+X = data[:,0:2]
+y = data[:,2]
+
+# Get list of boundary lines
+# Feel free to play with the learning rate and the num_epochs, and see
+# your results plotted below
+boundary_lines = train_perceptron_algorithm(X, y)
+
+# Set up plot styling
+plt.xlim(-0.05,1.05)
+plt.ylim(-0.05,1.05)
+plt.grid(False)
+plt.tick_params(axis='x', which='both', bottom='off', top='off')
+
+# Plot data points
+red = [1,0.3,0.3]
+blue = [0.25,0.5,1]
+red_points = X[np.argwhere(y==0).flatten()]
+blue_points = X[np.argwhere(y==1).flatten()]
+plt.scatter(red_points[:,0], red_points[:,1], s=50, color=red, edgecolor='k')
+plt.scatter(blue_points[:,0], blue_points[:,1], s=50, color=blue, edgecolor='k')
+
+# Plot boundary lines and solution regions
+for line in boundary_lines:
+    slope = line[0]
+    b = line[1]
+    plot_line(slope, b)
+solution_slope = boundary_lines[-1][0]
+solution_intercept = boundary_lines[-1][1]
+plot_line(solution_slope, solution_intercept, 'solid', 'k', True)
